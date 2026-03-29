@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const helmate = require('helmet');
 const morgan = require('morgan')
 const cors = require('cors');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const connectDB = require('./config/db');
+const response = require('./middleware/response');
 require('dotenv').config();
 
 
@@ -27,6 +29,9 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.use(response);
+
+connectDB();
 
 app.get('/health', (req, res) => res.ok({time: new Date().toISOString()},'OK'))
 
