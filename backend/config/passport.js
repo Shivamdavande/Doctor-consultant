@@ -17,38 +17,63 @@ passport.use('google', new GoogleStrategy({
     passReqToCallback: true
 },
 
-async (req, accessToken, refershToken, Profile, done) => {
-    try {
-        const userType = req.query.state || 'patient';
+    async (req, accessToken, refershToken, Profile, done) => {
+        try {
+            const userType = req.query.state || 'patient';
 
-        const {emails, displayName, photos} = Profile;
-        const email = emails?.[0]?.value;
-        const photo = photos?.[0]?.value;
+            const { emails, displayName, photos } = Profile;
+            const email = emails?.[0]?.value;
+            const photo = photos?.[0]?.value;
 
-        if (userType === 'doctor') {
-            let user = await Doctor.findOne({ email });
+            if (userType === 'doctor') {
+                let user = await Doctor.findOne({ email });
 
-            if (!user) {
-                user = await Doctor.create({
-                    googleId: Profile.id,
-                    email,
-                    name: displayName,
-                    profileImage: photo,
-                    isVerified: true
-                })
-            } else {
-                if (!user.googleId) {
-                    user.googleId = Profile.id;
-                    user.profileImage = photo;
-                    await user.save();
+                if (!user) {
+                    user = await Doctor.create({
+                        googleId: Profile.id,
+                        email,
+                        name: displayName,
+                        profileImage: photo,
+                        isVerified: true
+                    })
+                } else {
+                    if (!user.googleId) {
+                        user.googleId = Profile.id;
+                        user.profileImage = photo;
+                        await user.save();
+                    }
                 }
-            } 
-            return done(null, {user, type: 'doctor'})
-        }
+                return done(null, { user, type: 'doctor' })
 
-    } catch (error) {
-        
+            } else {
+                let user = await Patient.findOne({ email });
+
+                if (!user) {
+                    user = await Patient.create({
+                        googleId: Profile.id,
+                        email,
+                        name: displayName,
+                        profileImage: photo,
+                        isVerified: true
+                    })
+                } else {
+                    if (!user.googleId) {
+                        user.googleId = Profile.id;
+                        user.profileImage = photo;
+                        await user.save();
+                    }
+                }
+                return done(null, { user, type: 'patient' })
+            }
+
+        } catch (error) {
+            return done(error);
+        }
     }
-}
 
 ))
+
+
+
+
+module.exports = passport;

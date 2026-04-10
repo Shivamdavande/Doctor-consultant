@@ -33,6 +33,8 @@ app.use(response);
 
 connectDB();
 
+app.use('/api/auth', require('./routes/auth'));
+
 app.get('/health', (req, res) => res.ok({time: new Date().toISOString()},'OK'))
 
 
